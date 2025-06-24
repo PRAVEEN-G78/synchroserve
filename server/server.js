@@ -447,15 +447,25 @@ app.post("/api/employees", async (req, res) => {
       return res.status(401).json({ error: "No token provided" });
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
-    if (decoded.userType !== 'admin') {
-      return res.status(403).json({ error: "Access denied. Only admins can edit employee data." });
-    }
+
     const { email, employeeId, username, firstName, lastName } = req.body;
-    // Check firstName, lastName, and email match with EmployeeLogin
     const loginRecord = await EmployeeLogin.findOne(username ? { username } : { employeeId });
     if (!loginRecord) {
       return res.status(400).json({ error: "Employee record not found for this username or employee ID." });
     }
+
+    // Only allow employees to edit their own record and only if not approved
+    if (decoded.userType === 'employee') {
+      if (
+        (decoded.employeeId !== employeeId) ||
+        (loginRecord.status === 'Approved')
+      ) {
+        return res.status(403).json({ error: "Access denied. You cannot edit this record." });
+      }
+    }
+
+    // Admins can edit any record
+    // Validate names and email match login record
     const mismatches = [];
     if (loginRecord.firstName !== firstName) mismatches.push('First name');
     if (loginRecord.lastName !== lastName) mismatches.push('Last name');
@@ -463,6 +473,7 @@ app.post("/api/employees", async (req, res) => {
     if (mismatches.length > 0) {
       return res.status(400).json({ error: `${mismatches.join(', ')} do not match our records.` });
     }
+
     // Upsert (update if exists, insert if not)
     const query = username ? { username } : { employeeId };
     const updatedEmployee = await Employee.findOneAndUpdate(
@@ -728,6 +739,34 @@ app.post("/api/admin/register", async (req, res) => {
       return res.status(500).json({ error: `Database error: ${err.message}` });
     }
     res.status(500).json({ error: err.message || "Server error during admin registration" });
+  }
+});
+
+// Add after other employee routes
+app.delete('/api/employees/:id', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    if (decoded.userType !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Only admins can delete employees.' });
+    }
+    const { id } = req.params;
+    // Find the employee record
+    const employee = await Employee.findById(id);
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+    // Remove from Employee collection
+    await Employee.findByIdAndDelete(id);
+    // Remove from EmployeeLogin collection by employeeId
+    await EmployeeLogin.findOneAndDelete({ employeeId: employee.employeeId });
+    res.json({ success: true, message: 'Employee deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting employee:', err);
+    res.status(500).json({ error: 'Failed to delete employee' });
   }
 });
 
