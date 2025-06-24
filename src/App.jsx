@@ -23,7 +23,6 @@ import EmployeeHome from './components/Employee/EmployeeHome';
 import EmployeeLogin from './components/Auth/EmployeeLogin';
 import CentreLogin from './components/Auth/CentreLogin';
 import AdminLogin from './components/Auth/AdminLogin';
-import AdminRegister from './components/Auth/AdminRegister';
 import EmployeeRegister from './components/Auth/EmployeeRegister';
 import CentreRegister from './components/Auth/CentreRegister';
 import LoginSelection from './components/Auth/LoginSelection';
@@ -320,7 +319,6 @@ function App() {
               <Route path="/employee/login" element={<EmployeeLogin />} />
               <Route path="/centre/login" element={<CentreLogin />} />
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/register" element={<AdminRegister />} />
               <Route path="/employee/register" element={<EmployeeRegister />} />
               <Route path="/centre/register" element={<CentreRegister />} />
               <Route path="/login-selection" element={<LoginSelection />} />

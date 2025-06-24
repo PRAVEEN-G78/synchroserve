@@ -51,7 +51,6 @@ const initialFormData = {
   branchName: "",
   ifscCode: "",
   documents: [
-    { type: "HAR", file: null, url: undefined, key: undefined },
     { type: "Resume", file: null, url: undefined, key: undefined },
     {
       type: "Last Appointment Letter",
@@ -330,11 +329,13 @@ function Onboarding() {
       if (user && user.employeeId) {
         dataToSubmit.employeeId = user.employeeId;
       }
+      const token = localStorage.getItem('token');
 
       const response = await fetch("http://localhost:5000/api/employees", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify(dataToSubmit),
       });
@@ -947,7 +948,12 @@ function Onboarding() {
             <div className="document-list">
               {formData.documents.map((doc, index) => (
                 <div key={index} className="document-item">
-                  <label className="document-label">{doc.type}</label>
+                  <label className="document-label">{doc.type}{doc.type === 'All Experience Letters' && (
+                    <div style={{ fontSize: '0.95em', color: '#1976d2', marginBottom: 6 }}>
+                      Please upload all your experience certificates as a single PDF document.
+                    </div>
+                  )}</label> 
+                  
                   <div className="document-controls">
                     <input
                       type="file"

@@ -134,10 +134,12 @@
 .document-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 16px;
   border: 1px solid #ddd;
   border-radius: 4px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .document-title {
