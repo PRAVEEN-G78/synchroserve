@@ -66,14 +66,14 @@ function CentreLogin() {
         <button type="submit" className={`login-btn bouncy-btn${loading ? ' loading' : ''}`} disabled={loading}>
           {loading ? 'Logging in...' : 'Login'}
         </button>
-        <div className="login-footer">
+        <div className="login-footer" style={{ marginTop: 16, textAlign: 'center' }}>
+          <Link to="/centre/forgot-password" className="login-link">Forgot Password?</Link>
+        </div>
+        {/* <div className="login-footer">
           <span>Don't have an account?</span>
           <Link to="/centre/register" className="login-link">Register as Centre</Link>
-        </div>
-        <div className="login-footer">
-          <span>Employee login?</span>
-          <Link to="/employee/login" className="login-link">Employee Login</Link>
-        </div>
+        </div> */}
+        
       </form>
     </div>
   );

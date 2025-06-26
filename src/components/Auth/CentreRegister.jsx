@@ -49,30 +49,7 @@ function CentreRegister() {
     <div className="login-bg">
       <form className="login-form bouncy" onSubmit={handleSubmit} autoComplete="off">
         <h2 className="login-title">Centre Registration</h2>
-        <div className="login-field">
-          <label htmlFor="centreName">Centre Name</label>
-          <input
-            id="centreName"
-            name="centreName"
-            type="text"
-            value={form.centreName}
-            onChange={handleChange}
-            required
-            className="bouncy-input"
-          />
-        </div>
-        <div className="login-field">
-          <label htmlFor="centreCode">Centre Code</label>
-          <input
-            id="centreCode"
-            name="centreCode"
-            type="text"
-            value={form.centreCode}
-            onChange={handleChange}
-            required
-            className="bouncy-input"
-          />
-        </div>
+        
         <div className="login-field">
           <label htmlFor="username">Username</label>
           <input
@@ -104,6 +81,30 @@ function CentreRegister() {
             name="password"
             type="password"
             value={form.password}
+            onChange={handleChange}
+            required
+            className="bouncy-input"
+          />
+        </div>
+        <div className="login-field">
+          <label htmlFor="centreName">Centre Name</label>
+          <input
+            id="centreName"
+            name="centreName"
+            type="text"
+            value={form.centreName}
+            onChange={handleChange}
+            required
+            className="bouncy-input"
+          />
+        </div>
+        <div className="login-field">
+          <label htmlFor="centreCode">Centre Code</label>
+          <input
+            id="centreCode"
+            name="centreCode"
+            type="text"
+            value={form.centreCode}
             onChange={handleChange}
             required
             className="bouncy-input"

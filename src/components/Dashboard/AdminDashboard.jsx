@@ -14,6 +14,17 @@ function AdminDashboard() {
   const [adminForm, setAdminForm] = useState({ name: user?.name || '', email: user?.email || '', adminId: user?.adminId || '' });
   const [adminSaveError, setAdminSaveError] = useState('');
   const [adminSaveLoading, setAdminSaveLoading] = useState(false);
+  const [centers, setCenters] = useState([]);
+  const [selectedCenter, setSelectedCenter] = useState(null);
+  const [openCenterDialog, setOpenCenterDialog] = useState(false);
+  const [editCenterDialogOpen, setEditCenterDialogOpen] = useState(false);
+  const [editCenter, setEditCenter] = useState(null);
+  const [editCenterForm, setEditCenterForm] = useState({});
+  const [centerSaveLoading, setCenterSaveLoading] = useState(false);
+  const [centerSaveError, setCenterSaveError] = useState('');
+  const [centersLoading, setCentersLoading] = useState(false);
+  const [centerCodeFilter, setCenterCodeFilter] = useState("");
+  const [employeeIdFilter, setEmployeeIdFilter] = useState("");
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -39,6 +50,33 @@ function AdminDashboard() {
       }
     };
     fetchEmployees();
+  }, []);
+
+  const fetchCenters = async () => {
+    setCentersLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/centers', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCenters(data);
+      } else {
+        setCenters([]);
+      }
+    } catch (err) {
+      setCenters([]);
+    } finally {
+      setCentersLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCenters();
   }, []);
 
   const handleEditClick = (employee) => {
@@ -163,9 +201,181 @@ function AdminDashboard() {
     setAdminSaveError('');
   };
 
+  const handleViewCenter = (center) => {
+    setSelectedCenter(center);
+    setOpenCenterDialog(true);
+  };
+
+  const handleCloseCenterDialog = () => {
+    setOpenCenterDialog(false);
+    setSelectedCenter(null);
+  };
+
+  const handleEditCenterClick = (center) => {
+    setEditCenter(center);
+    setEditCenterForm({ ...center });
+    setEditCenterDialogOpen(true);
+    setCenterSaveError('');
+  };
+
+  const handleEditCenterChange = (e) => {
+    setEditCenterForm({ ...editCenterForm, [e.target.name]: e.target.value });
+  };
+
+  const handleEditCenterSave = async (e) => {
+    e.preventDefault();
+    setCenterSaveLoading(true);
+    setCenterSaveError('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:5000/api/centers/${editCenter._id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(editCenterForm)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCenterSaveError(data.error || 'Failed to save changes');
+        setCenterSaveLoading(false);
+        return;
+      }
+      setCenters((prev) => prev.map(c => c._id === data._id ? data : c));
+      setEditCenterDialogOpen(false);
+      setEditCenter(null);
+    } catch (err) {
+      setCenterSaveError('Network error');
+    } finally {
+      setCenterSaveLoading(false);
+    }
+  };
+
+  const handleEditCenterDialogClose = () => {
+    setEditCenterDialogOpen(false);
+    setEditCenter(null);
+    setEditCenterForm({});
+    setCenterSaveError('');
+  };
+
+  const handleDeleteCenter = async () => {
+    if (!editCenter) return;
+    if (!window.confirm('Are you sure you want to delete this center? This action cannot be undone.')) return;
+    setCenterSaveLoading(true);
+    setCenterSaveError('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:5000/api/centers/${editCenter._id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setCenterSaveError(data.error || 'Failed to delete center');
+        setCenterSaveLoading(false);
+        return;
+      }
+      setCenters((prev) => prev.filter(c => c._id !== editCenter._id));
+      setEditCenterDialogOpen(false);
+      setEditCenter(null);
+    } catch (err) {
+      setCenterSaveError('Network error');
+    } finally {
+      setCenterSaveLoading(false);
+    }
+  };
+
+  const handleApproveCenter = async () => {
+    if (!editCenter) return;
+    setCenterSaveLoading(true);
+    setCenterSaveError('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:5000/api/centers/${editCenter._id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'Approved' })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCenterSaveError(data.error || 'Failed to approve center');
+        setCenterSaveLoading(false);
+        return;
+      }
+      setCenters((prev) => prev.map(c => c._id === data._id ? data : c));
+      setEditCenterDialogOpen(false);
+      setEditCenter(null);
+    } catch (err) {
+      setCenterSaveError('Network error');
+    } finally {
+      setCenterSaveLoading(false);
+    }
+  };
+
+  const handleRejectCenter = async () => {
+    if (!editCenter) return;
+    setCenterSaveLoading(true);
+    setCenterSaveError('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:5000/api/centers/${editCenter._id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'Rejected' })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCenterSaveError(data.error || 'Failed to reject center');
+        setCenterSaveLoading(false);
+        return;
+      }
+      setCenters((prev) => prev.map(c => c._id === data._id ? data : c));
+      setEditCenterDialogOpen(false);
+      setEditCenter(null);
+    } catch (err) {
+      setCenterSaveError('Network error');
+    } finally {
+      setCenterSaveLoading(false);
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Admin Dashboard</h1>
+      {/* Overall Dashboard Summary */}
+      <div className="stats-container" style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+      <div className="stat-card">
+          <div className="stat-icon"><i className="icon">🏢</i></div>
+          <div className="stat-value">{centers.length}</div>
+          <div className="stat-label">Total Centers</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon"><i className="icon">👥</i></div>
+          <div className="stat-value">{employees.length}</div>
+          <div className="stat-label">Total Employees</div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon"><i className="icon">✅</i></div>
+          <div className="stat-value">{employees.filter(emp => emp.status === 'Approved').length}</div>
+          <div className="stat-label">Approved Employees</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon"><i className="icon">⏳</i></div>
+          <div className="stat-value">{employees.filter(emp => emp.status === 'Pending').length}</div>
+          <div className="stat-label">Pending Employees</div>
+        </div>
+      </div>
       <div className="card">
         <div className="card-content">
           <h2>Welcome, {user?.name || 'Admin'}!</h2>
@@ -176,6 +386,9 @@ function AdminDashboard() {
               <li><b>Admin ID:</b> {user?.adminId}</li>
               <li><b>Email:</b> {user?.email}</li>
               <li><b>Role:</b> {user?.role}</li>
+              {user?.centreCode && (
+                <li><b>Centre Code:</b> {user.centreCode}</li>
+              )}
             </ul>
             <button className="button button-primary" style={{ marginTop: 16 }} onClick={handleAdminEditOpen}>
               Edit Admin Profile
@@ -187,6 +400,13 @@ function AdminDashboard() {
       <div className="card" style={{ marginTop: '2rem' }}>
         <div className="card-content">
           <h2>All Employees</h2>
+          <input
+            type="text"
+            placeholder="Filter by Employee ID"
+            value={employeeIdFilter}
+            onChange={e => setEmployeeIdFilter(e.target.value)}
+            style={{ marginBottom: 16, padding: 8, borderRadius: 4, border: '1px solid #ccc', width: 220 }}
+          />
           {loading ? (
             <div className="loading"><div className="loading-spinner"></div></div>
           ) : (
@@ -194,7 +414,9 @@ function AdminDashboard() {
               <table className="table">
                 <thead>
                   <tr>
+                    <th>Employee ID</th>
                     <th>Name</th>
+                    <th>Centre Code</th>
                     <th>Position</th>
                     <th>Email</th>
                     <th>Status</th>
@@ -203,9 +425,14 @@ function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {employees.map((employee) => (
+                  {(employeeIdFilter
+                    ? employees.filter(emp => (emp.employeeId || '').toLowerCase().includes(employeeIdFilter.toLowerCase()))
+                    : employees
+                  ).map((employee) => (
                     <tr key={employee._id}>
+                      <td>{employee.employeeId || '-'}</td>
                       <td>{employee.firstName} {employee.lastName}</td>
+                      <td>{employee.centreCode || employee.centerCode || '-'}</td>
                       <td>{employee.position || '-'}</td>
                       <td>{employee.email || '-'}</td>
                       <td>
@@ -228,6 +455,58 @@ function AdminDashboard() {
         </div>
       </div>
 
+      <div className="card" style={{ marginTop: '2rem' }}>
+        <div className="card-content">
+          <h2>Registered Centers</h2>
+          <input
+            type="text"
+            placeholder="Filter by Center Code"
+            value={centerCodeFilter}
+            onChange={e => setCenterCodeFilter(e.target.value)}
+            style={{ marginBottom: 16, padding: 8, borderRadius: 4, border: '1px solid #ccc', width: 220 }}
+          />
+          <div className="table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Center Name</th>
+                  <th>Center Code</th>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Registration Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(centerCodeFilter
+                  ? centers.filter(center => (center.centreCode || '').toLowerCase().includes(centerCodeFilter.toLowerCase()))
+                  : centers
+                ).map((center) => (
+                  <tr key={center._id}>
+                    <td>{center.centreName}</td>
+                    <td>{center.centreCode}</td>
+                    <td>{center.username}</td>
+                    <td>{center.email}</td>
+                    <td>
+                      <span className={`status-chip status-${center.role === 'admin' ? 'admin' : 'centre'}`}>{center.role}</span>
+                    </td>
+                    <td>
+                      <span className={`status-chip status-${(center.status || 'Pending').toLowerCase()}`}>{center.status || 'Pending'}</span>
+                    </td>
+                    <td>{center.createdAt ? new Date(center.createdAt).toLocaleDateString() : '-'}</td>
+                    <td>
+                      <button className="icon-button" onClick={() => handleViewCenter(center)} title="View"><i className="icon">👁️</i></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       {/* Edit Employee Dialog */}
       {editDialogOpen && editEmployee && (
         <div className="dialog-overlay">
@@ -237,6 +516,14 @@ function AdminDashboard() {
               <div className="form-group">
                 <label className="form-label">Employee ID</label>
                 <input className="form-input" name="employeeId" value={editForm.employeeId || ''} readOnly />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Centre Code</label>
+                <input className="form-input" name="centreCode" value={editForm.centreCode || editEmployee.centreCode || editEmployee.centerCode || ''} onChange={handleEditChange} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Centre Name</label>
+                <input className="form-input" name="centreName" value={editForm.centreName || ''} onChange={handleEditChange} />
               </div>
               <div className="form-group">
                 <label className="form-label">First Name</label>
@@ -388,6 +675,21 @@ function AdminDashboard() {
                 <label className="form-label">IFSC Code</label>
                 <input className="form-input" name="ifscCode" value={editForm.ifscCode || ''} onChange={handleEditChange} />
               </div>
+              {/* Documents Section for Admin */}
+              <div className="form-group">
+                <label className="form-label">Documents</label>
+                <ul className="document-list-view">
+                  {Array.isArray(editEmployee.documents) && editEmployee.documents.length > 0 ? (
+                    editEmployee.documents.map((doc, i) => (
+                      <li key={i}>
+                        {doc.type}: {doc.url ? <a href={doc.url} className="file-link" target="_blank" rel="noopener noreferrer">View</a> : 'Not uploaded'}
+                      </li>
+                    ))
+                  ) : (
+                    <li>No documents uploaded</li>
+                  )}
+                </ul>
+              </div>
               {saveError && <div className="login-error bouncy-error" style={{ marginBottom: 8 }}>{saveError}</div>}
               <div className="dialog-actions">
                 <button type="button" className="button button-secondary" onClick={handleEditDialogClose}>
@@ -449,6 +751,120 @@ function AdminDashboard() {
                 <button type="submit" className="button button-primary" disabled={adminSaveLoading}>
                   {adminSaveLoading ? 'Saving...' : 'Save Changes'}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Center Details Dialog */}
+      {openCenterDialog && selectedCenter && (
+        <div className="dialog-overlay">
+          <div className="dialog">
+            <h2 className="dialog-title">Center Details</h2>
+            <div className="dialog-content">
+              <div className="form-group">
+                <label className="form-label">Center Name</label>
+                <div>{selectedCenter.centreName}</div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Center Code</label>
+                <div>{selectedCenter.centreCode}</div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Username</label>
+                <div>{selectedCenter.username}</div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <div>{selectedCenter.email}</div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Role</label>
+                <div>
+                  <span className={`status-chip status-${selectedCenter.role === 'admin' ? 'admin' : 'centre'}`}>
+                    {selectedCenter.role}
+                  </span>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Registration Date</label>
+                <div>{selectedCenter.createdAt ? new Date(selectedCenter.createdAt).toLocaleString() : '-'}</div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Last Updated</label>
+                <div>{selectedCenter.updatedAt ? new Date(selectedCenter.updatedAt).toLocaleString() : '-'}</div>
+              </div>
+            </div>
+            <div className="dialog-actions">
+              <button
+                className="button button-secondary"
+                onClick={handleCloseCenterDialog}
+              >
+                Close
+              </button>
+              <button
+                className="button button-primary"
+                onClick={() => {
+                  setEditCenter(selectedCenter);
+                  setEditCenterForm({ ...selectedCenter });
+                  setEditCenterDialogOpen(true);
+                  setOpenCenterDialog(false);
+                }}
+                style={{ marginLeft: 8 }}
+              >
+                Edit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Center Dialog */}
+      {editCenterDialogOpen && editCenter && (
+        <div className="dialog-overlay">
+          <div className="dialog">
+            <h2 className="dialog-title">Edit Center</h2>
+            <form className="dialog-content" onSubmit={handleEditCenterSave}>
+              <div className="form-group">
+                <label className="form-label">Center Name</label>
+                <input className="form-input" name="centreName" value={editCenterForm.centreName || ''} onChange={handleEditCenterChange} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Center Code</label>
+                <input className="form-input" name="centreCode" value={editCenterForm.centreCode || ''} onChange={handleEditCenterChange} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Username</label>
+                <input className="form-input" name="username" value={editCenterForm.username || ''} onChange={handleEditCenterChange} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input className="form-input" name="email" type="email" value={editCenterForm.email || ''} onChange={handleEditCenterChange} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Role</label>
+                <input className="form-input" name="role" value={editCenterForm.role || ''} onChange={handleEditCenterChange} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select className="form-input" name="status" value={editCenterForm.status || 'Pending'} onChange={handleEditCenterChange}>
+                  <option value="Pending">Pending</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+              {centerSaveError && <div className="login-error bouncy-error" style={{ marginBottom: 8 }}>{centerSaveError}</div>}
+              <div className="dialog-actions">
+                <button type="button" className="button button-secondary" onClick={handleEditCenterDialogClose}>Cancel</button>
+                <button type="submit" className="button button-primary" disabled={centerSaveLoading}>{centerSaveLoading ? 'Saving...' : 'Save Changes'}</button>
+                <button type="button" className="button button-secondary" style={{ color: 'red', borderColor: 'red' }} onClick={handleDeleteCenter} disabled={centerSaveLoading}>Delete</button>
+                {editCenterForm.status !== 'Approved' && (
+                  <button type="button" className="button button-primary" style={{ backgroundColor: 'green', marginLeft: 8 }} onClick={handleApproveCenter} disabled={centerSaveLoading}>Approve</button>
+                )}
+                {editCenterForm.status !== 'Rejected' && (
+                  <button type="button" className="button button-secondary" style={{ color: 'orange', borderColor: 'orange', marginLeft: 8 }} onClick={handleRejectCenter} disabled={centerSaveLoading}>Reject</button>
+                )}
               </div>
             </form>
           </div>

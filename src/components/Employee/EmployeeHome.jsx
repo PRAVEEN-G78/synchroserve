@@ -177,47 +177,40 @@ function EmployeeHome() {
         {employeeRecord && (
           <div className="onboarding-details">
             <h2>Onboarding Details</h2>
-            <div className="onboarding-details-grid">
-              <div><strong>First Name:</strong> {employeeRecord.firstName}</div>
-              <div><strong>Last Name:</strong> {employeeRecord.lastName}</div>
-              <div><strong>Email:</strong> {employeeRecord.email}</div>
-              <div><strong>Phone:</strong> {employeeRecord.phone}</div>
-              <div><strong>Address:</strong> {employeeRecord.address}</div>
-              <div><strong>City:</strong> {employeeRecord.city}</div>
-              <div><strong>State:</strong> {employeeRecord.state}</div>
-              <div><strong>Pincode:</strong> {employeeRecord.pincode}</div>
-              <div><strong>Highest Qualification:</strong> {employeeRecord.highestQualification}</div>
-              <div><strong>Position:</strong> {employeeRecord.position}</div>
-              <div><strong>Current Salary:</strong> {employeeRecord.currentSalary}</div>
-              <div><strong>Marital Status:</strong> {employeeRecord.maritalStatus}</div>
-              {employeeRecord.maritalStatus === 'Married' && (
-                <>
-                  <div><strong>Spouse Name:</strong> {employeeRecord.spouseName}</div>
-                  <div><strong>Wedding Date:</strong> {employeeRecord.weddingDate ? new Date(employeeRecord.weddingDate).toLocaleDateString() : ''}</div>
-                </>
-              )}
-              <div><strong>Blood Group:</strong> {employeeRecord.bloodGroup}</div>
-              <div><strong>UAN Number:</strong> {employeeRecord.uanNumber}</div>
-              <div><strong>ESI Number:</strong> {employeeRecord.esiNumber}</div>
-              <div><strong>Aadhar Number:</strong> {employeeRecord.aadharNumber}</div>
-              <div><strong>PAN Number:</strong> {employeeRecord.panNumber}</div>
-              <div><strong>Bank Account Number:</strong> {employeeRecord.bankAccountNumber}</div>
-              <div><strong>Bank Name:</strong> {employeeRecord.bankName}</div>
-              <div><strong>Branch Name:</strong> {employeeRecord.branchName}</div>
-              <div><strong>IFSC Code:</strong> {employeeRecord.ifscCode}</div>
-            </div>
-            {employeeRecord.emergencyContact && employeeRecord.emergencyContact.length > 0 && (
-              <div style={{ marginTop: 16 }}>
-                <strong>Emergency Contacts:</strong>
-                <ul>
-                  {employeeRecord.emergencyContact.map((c, i) => (
-                    <li key={i}>
-                      {c.name} ({c.relationship}) - {c.phone}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <table className="onboarding-table">
+              <tbody>
+                <tr><th>First Name</th><td>{employeeRecord.firstName || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Last Name</th><td>{employeeRecord.lastName || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Email</th><td>{employeeRecord.email || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Phone</th><td>{employeeRecord.phone || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Address</th><td>{employeeRecord.address || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>City</th><td>{employeeRecord.city || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>State</th><td>{employeeRecord.state || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Pincode</th><td>{employeeRecord.pincode || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Highest Qualification</th><td>{employeeRecord.highestQualification || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Position</th><td>{employeeRecord.position || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Current Salary</th><td>{employeeRecord.currentSalary || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Marital Status</th><td>{employeeRecord.maritalStatus || <span className="placeholder">Not provided</span>}</td></tr>
+                {employeeRecord.maritalStatus === 'Married' && (
+                  <>
+                    <tr><th>Spouse Name</th><td>{employeeRecord.spouseName || <span className="placeholder">Not provided</span>}</td></tr>
+                    <tr><th>Wedding Date</th><td>{employeeRecord.weddingDate ? new Date(employeeRecord.weddingDate).toLocaleDateString() : <span className="placeholder">Not provided</span>}</td></tr>
+                  </>
+                )}
+                <tr><th>Blood Group</th><td>{employeeRecord.bloodGroup || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>UAN Number</th><td>{employeeRecord.uanNumber || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>ESI Number</th><td>{employeeRecord.esiNumber || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Aadhar Number</th><td>{employeeRecord.aadharNumber || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>PAN Number</th><td>{employeeRecord.panNumber || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Bank Account Number</th><td>{employeeRecord.bankAccountNumber || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Bank Name</th><td>{employeeRecord.bankName || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>Branch Name</th><td>{employeeRecord.branchName || <span className="placeholder">Not provided</span>}</td></tr>
+                <tr><th>IFSC Code</th><td>{employeeRecord.ifscCode || <span className="placeholder">Not provided</span>}</td></tr>
+                {employeeRecord.emergencyContact && employeeRecord.emergencyContact.length > 0 && employeeRecord.emergencyContact.map((c, i) => (
+                  <tr key={i}><th>{`Emergency Contact${employeeRecord.emergencyContact.length > 1 ? ' ' + (i+1) : ''}`}</th><td>{(c.name && c.relationship && c.phone) ? `${c.name} (${c.relationship}) - ${c.phone}` : <span className="placeholder">Not provided</span>}</td></tr>
+                ))}
+              </tbody>
+            </table>
             {employeeRecord.documents && employeeRecord.documents.length > 0 && (
               <div style={{ marginTop: 16 }}>
                 <strong>Documents:</strong>

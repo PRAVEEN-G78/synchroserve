@@ -116,6 +116,7 @@ const initialFormData = {
       key: undefined,
     },
   ],
+  centerCode: "",
 };
 
 const educationOptions = [
@@ -735,7 +736,7 @@ function Onboarding() {
                     />
                     <input
                       type="text"
-                      placeholder="Relationship with the person"
+                      placeholder="Relationship "
                       value={contact.relationship}
                       onChange={e => handleEmergencyContactChange(idx, 'relationship', e.target.value)}
                       className="form-input"
@@ -749,17 +750,29 @@ function Onboarding() {
                       className="form-input"
                       style={{ flex: 1 }}
                     />
-                    <button type="button" onClick={() => removeEmergencyContact(idx)} style={{ marginLeft: 8 }}>Remove</button>
+                    <button type="button" onClick={() => removeEmergencyContact(idx)} className="remove-contact-button" style={{ marginLeft: 8 }}>Remove</button>
                   </div>
                 </div>
               ))}
-              <button type="button" onClick={addEmergencyContact} style={{ marginTop: 8 }}>Add Emergency Contact</button>
+              <button type="button" onClick={addEmergencyContact} className="add-contact-button" style={{ marginTop: 8 }}>Add Emergency Contact</button>
             </div>
           </div>
         );
       case 2:
         return (
           <div className="form-grid">
+            <div className="form-group">
+              <label className="form-label">Centre Code</label>
+              <input
+                type="text"
+                name="centerCode"
+                value={formData.centerCode}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                className={`form-input ${errors.centerCode ? "error" : ""}`}
+              />
+              {/* {errors.centerCode && <div className="error-message">{errors.centerCode}</div>} */}
+            </div>
             <div className="form-group">
               <label className="form-label">Experience (Total Years)</label>
               <input

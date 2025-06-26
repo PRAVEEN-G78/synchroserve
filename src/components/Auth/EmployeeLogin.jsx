@@ -73,14 +73,14 @@ function EmployeeLogin() {
         <button type="submit" className={`login-btn bouncy-btn${loading ? ' loading' : ''}`} disabled={loading}>
           {loading ? 'Logging in...' : 'Login'}
         </button>
-        <div className="login-footer">
+        <div className="login-footer" style={{ marginTop: 16, textAlign: 'center' }}>
+          <Link to="/employee/forgot-password" className="login-link">Forgot Password?</Link>
+        </div>
+        {/* <div className="login-footer">
           <span>Don't have an account?</span>
           <Link to="/employee/register" className="login-link">Employee Register</Link>
-        </div>
-        <div className="login-footer">
-          <span>Centre login?</span>
-          <Link to="/centre/login" className="login-link">Centre Login</Link>
-        </div>
+        </div> */}
+       
       </form>
     </div>
   );

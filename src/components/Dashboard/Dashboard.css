@@ -246,7 +246,7 @@
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: 0.25rem;
 }
 
 /* Form Elements */

@@ -8,7 +8,8 @@ function EmployeeRegister() {
     email: '',
     password: '',
     firstName: '',
-    lastName: ''
+    lastName: '',
+    centerCode: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -105,6 +106,30 @@ function EmployeeRegister() {
             name="password"
             type="password"
             value={form.password}
+            onChange={handleChange}
+            required
+            className="bouncy-input"
+          />
+        </div>
+        <div className="login-field">
+          <label htmlFor="centreName">Centre Name</label>
+          <input
+            id="centreName"
+            name="centreName"
+            type="text"
+            value={form.centreName}
+            onChange={handleChange}
+            required
+            className="bouncy-input"
+          />
+        </div>
+        <div className="login-field">
+          <label htmlFor="centerCode">Center Code</label>
+          <input
+            id="centerCode"
+            name="centerCode"
+            type="text"
+            value={form.centerCode}
             onChange={handleChange}
             required
             className="bouncy-input"

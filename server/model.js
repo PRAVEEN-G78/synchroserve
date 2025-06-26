@@ -3,6 +3,7 @@ import { loginDB, employeeDB } from './db.js';
 
 const EmployeeSchema = new mongoose.Schema({
   employeeId: { type: String, required: true, unique: true },
+  centerCode: { type: String },
   firstName: { type: String, required: true },
   lastName: { type: String },
   fatherName: { type: String },
@@ -56,6 +57,7 @@ const EmployeeSchema = new mongoose.Schema({
 
 const EmployeeLoginSchema = new mongoose.Schema({
   employeeId: { type: String, required: true, unique: true },
+  centerCode: { type: String },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   firstName: { type: String, required: true },
@@ -70,7 +72,7 @@ const CentreLoginSchema = new mongoose.Schema({
   password: { type: String, required: true },
   centreName: { type: String, required: true },
   centreCode: { type: String, required: true, unique: true },
-  role: { type: String, enum: ['centre', 'admin'], default: 'centre' }
+  role: { type: String, enum: ['centre', 'admin'], default: 'centre' },
 }, { timestamps: true });
 
 const AdminLoginSchema = new mongoose.Schema({
@@ -79,6 +81,15 @@ const AdminLoginSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   role: { type: String, enum: ['admin'], default: 'admin' }
+}, { timestamps: true });
+
+// Attendance Schema
+const AttendanceSchema = new mongoose.Schema({
+  employeeId: { type: String, required: true },
+  date: { type: Date, required: true },
+  checkIn: { type: Date },
+  checkOut: { type: Date },
+  status: { type: String, enum: ['Present', 'Absent', 'On Leave', 'Half Day'], default: 'Present' }
 }, { timestamps: true });
 
 // Use employeeDB for Employee model (employeeRecords database)
@@ -91,3 +102,6 @@ export const EmployeeLogin = loginDB.model('EmployeeLogin', EmployeeLoginSchema,
 export const CentreLogin = loginDB.model('CentreLogin', CentreLoginSchema, 'centreLogins');
 
 export const AdminLogin = loginDB.model('AdminLogin', AdminLoginSchema, 'adminLogins');
+
+// Use employeeDB for Attendance model (attendance collection)
+export const Attendance = employeeDB.model('Attendance', AttendanceSchema, 'attendance');

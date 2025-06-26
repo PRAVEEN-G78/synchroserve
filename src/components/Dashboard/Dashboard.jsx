@@ -9,6 +9,11 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [centers, setCenters] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [centreCodeFilter, setCentreCodeFilter] = useState('');
+
+  // Get current user's centre code (for centre login)
+  const user = JSON.parse(localStorage.getItem('user'));
+  const userCentreCode = user?.centreCode || user?.centerCode || '';
 
   useEffect(() => {
     // Fetch both centers and employees
@@ -146,13 +151,13 @@ function Dashboard() {
 
       {/* Statistics Overview */}
       <div className="stats-container">
-        <div className="stat-card">
+        {/* <div className="stat-card">
           <div className="stat-icon">
             <i className="icon">🏢</i>
           </div>
           <div className="stat-value">{centers.length}</div>
           <div className="stat-label">Total Centers</div>
-        </div>
+        </div> */}
 
         <div className="stat-card">
           <div className="stat-icon">
@@ -187,11 +192,20 @@ function Dashboard() {
       <div className="card">
         <div className="card-content">
           <h2>Employee Records</h2>
+          <input
+            type="text"
+            placeholder="Filter by Centre Code"
+            value={centreCodeFilter}
+            onChange={e => setCentreCodeFilter(e.target.value)}
+            style={{ marginBottom: 16, padding: 8, borderRadius: 4, border: '1px solid #ccc', width: 220 }}
+          />
           <div className="table-container">
             <table className="table">
               <thead>
                 <tr>
+                  <th>Employee ID</th>
                   <th>Name</th>
+                  <th>Centre Code</th>
                   <th>Position</th>
                   <th>Email</th>
                   <th>Status</th>
@@ -200,9 +214,16 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {employees.map((employee) => (
+                {(centreCodeFilter
+                  ? employees.filter(emp => (emp.centreCode || emp.centerCode || '').toLowerCase().includes(centreCodeFilter.toLowerCase()))
+                  : (userCentreCode
+                      ? employees.filter(emp => (emp.centreCode || emp.centerCode || '').toLowerCase() === userCentreCode.toLowerCase())
+                      : employees)
+                ).map((employee) => (
                   <tr key={employee._id}>
+                    <td>{employee.employeeId || '-'}</td>
                     <td>{employee.firstName} {employee.lastName}</td>
+                    <td>{employee.centreCode || employee.centerCode || '-'}</td>
                     <td>{employee.position || '-'}</td>
                     <td>{employee.email || '-'}</td>
                     <td>
@@ -215,52 +236,6 @@ function Dashboard() {
                       <button
                         className="icon-button"
                         onClick={() => handleViewEmployee(employee)}
-                      >
-                        <i className="icon">👁️</i>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* Centers List */}
-      <div className="card">
-        <div className="card-content">
-          <h2>Registered Centers</h2>
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Center Name</th>
-                  <th>Center Code</th>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Registration Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {centers.map((center) => (
-                  <tr key={center._id}>
-                    <td>{center.centreName}</td>
-                    <td>{center.centreCode}</td>
-                    <td>{center.username}</td>
-                    <td>{center.email}</td>
-                    <td>
-                      <span className={`status-chip status-${center.role === 'admin' ? 'admin' : 'centre'}`}>
-                        {center.role}
-                      </span>
-                    </td>
-                    <td>{center.createdAt ? new Date(center.createdAt).toLocaleDateString() : '-'}</td>
-                    <td>
-                      <button
-                        className="icon-button"
-                        onClick={() => handleViewCenter(center)}
                       >
                         <i className="icon">👁️</i>
                       </button>
@@ -375,9 +350,7 @@ function Dashboard() {
               <div className="form-group">
                 <label className="form-label">Role</label>
                 <div>
-                  <span className={`status-chip status-${selectedCenter.role === 'admin' ? 'admin' : 'centre'}`}>
-                    {selectedCenter.role}
-                  </span>
+                  <span className={`status-chip status-${selectedCenter.role === 'admin' ? 'admin' : 'centre'}`}>{selectedCenter.role}</span>
                 </div>
               </div>
               <div className="form-group">
@@ -390,10 +363,7 @@ function Dashboard() {
               </div>
             </div>
             <div className="dialog-actions">
-              <button
-                className="button button-secondary"
-                onClick={handleCloseDialog}
-              >
+              <button className="button button-secondary" onClick={handleCloseDialog}>
                 Close
               </button>
             </div>

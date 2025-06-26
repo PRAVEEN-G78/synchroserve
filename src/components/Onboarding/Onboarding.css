@@ -119,12 +119,12 @@
 }
 
 .button-secondary {
-  background-color: #f5f5f5;
-  color: #333;
+  background-color: #1976d2;
+  color:white;
 }
 
 .button-secondary:hover {
-  background-color: #e0e0e0;
+  background-color:#1976d2 ;
 }
 
 .document-upload {
@@ -199,10 +199,11 @@
 }
 
 .add-contact-button {
-  background-color: #4caf50;
+  background-color: #b71c1c;
   color: white;
   padding: 8px 16px;
   border-radius: 4px;
+  border: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -210,7 +211,7 @@
 }
 
 .add-contact-button:hover {
-  background-color: #388e3c;
+  background-color: #b71c1c;
 }
 
 .remove-contact-button {
@@ -241,4 +242,60 @@
   border-radius: 4px;
   margin-bottom: 16px;
   border: 1px solid #a5d6a7;
+}
+
+.file-link {
+  display: inline-block;
+  margin-left: 12px;
+  padding: 6px 14px;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 4px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  border: 1px solid #90caf9;
+}
+
+.file-link:hover {
+  background-color: #1976d2;
+  color: #fff;
+  text-decoration: underline;
+}
+
+.document-list-view {
+  margin: 12px 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.document-list-view li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.document-list-view li:last-child {
+  border-bottom: none;
+}
+
+.document-list-view .file-link {
+  margin-left: 8px;
+  padding: 4px 10px;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 4px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  border: 1px solid #90caf9;
+}
+
+.document-list-view .file-link:hover {
+  background-color: #1976d2;
+  color: #fff;
+  text-decoration: underline;
 } 

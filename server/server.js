@@ -3,7 +3,7 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import { connectDB } from "./db.js";
-import { Employee, EmployeeLogin, CentreLogin, AdminLogin } from "./model.js";
+import { Employee, EmployeeLogin, CentreLogin, AdminLogin, Attendance } from "./model.js";
 import multer from "multer";
 import AWS from "aws-sdk";
 import fs from "fs";
@@ -47,7 +47,7 @@ app.get("/", (req, res) => res.send("API Running"));
 // Employee Registration
 app.post("/api/employee/register", async (req, res) => {
   try {
-    const { employeeId, email, password, firstName, lastName } = req.body;
+    const { employeeId, email, password, firstName, lastName, centerCode } = req.body;
 
     // Check if user already exists
     const existingUser = await EmployeeLogin.findOne({ $or: [{ email }, { employeeId }] });
@@ -68,6 +68,7 @@ app.post("/api/employee/register", async (req, res) => {
       password: hashedPassword,
       firstName,
       lastName,
+      centerCode,
       status: 'Pending',
     });
 
@@ -362,8 +363,8 @@ app.get("/api/centers", async (req, res) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
-    if (decoded.userType !== 'centre') {
-      return res.status(403).json({ error: "Access denied. Only centers can view center data." });
+    if (decoded.userType !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Only admins can view center data." });
     }
 
     // Fetch all centers from centreLogins collection
@@ -474,6 +475,20 @@ app.post("/api/employees", async (req, res) => {
       return res.status(400).json({ error: `${mismatches.join(', ')} do not match our records.` });
     }
 
+    // Handle both centerCode and centreCode fields
+    let centerCode = req.body.centerCode || req.body.centreCode;
+    if (!centerCode && (loginRecord.centerCode || loginRecord.centreCode)) {
+      centerCode = loginRecord.centerCode || loginRecord.centreCode;
+    }
+    if (centerCode) {
+      // Validate centerCode exists in CentreLogin
+      const centreExists = await CentreLogin.findOne({ centreCode: centerCode });
+      if (!centreExists) {
+        return res.status(400).json({ error: 'Invalid Centre Code: No such centre exists.' });
+      }
+      req.body.centerCode = centerCode; // Ensure centerCode is set in the body
+    }
+
     // Upsert (update if exists, insert if not)
     const query = username ? { username } : { employeeId };
     const updatedEmployee = await Employee.findOneAndUpdate(
@@ -481,6 +496,13 @@ app.post("/api/employees", async (req, res) => {
       req.body,
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
+    // Also update centerCode in EmployeeLogin
+    if (centerCode) {
+      await EmployeeLogin.findOneAndUpdate(
+        { employeeId: req.body.employeeId },
+        { centerCode }
+      );
+    }
     res.status(201).json(updatedEmployee);
   } catch (err) {
     console.error("Employee creation error:", err);
@@ -768,6 +790,244 @@ app.delete('/api/employees/:id', async (req, res) => {
     console.error('Error deleting employee:', err);
     res.status(500).json({ error: 'Failed to delete employee' });
   }
+});
+
+// Attendance Face & Location Validation
+app.post('/api/attendance/validate', upload.single('file'), async (req, res) => {
+  try {
+    const { latitude, longitude } = req.body;
+    if (!latitude || !longitude || !req.file) {
+      return res.status(400).json({ error: 'Missing image or location data' });
+    }
+    // Geo-fence config (same as attendanceFaceID)
+    const AUTHORIZED_LOCATION = [17.483114, 78.320068];
+    const GEOFENCE_RADIUS_METERS = 100;
+    const userLocation = [parseFloat(latitude), parseFloat(longitude)];
+    // Calculate distance (Haversine formula)
+    function toRad(x) { return x * Math.PI / 180; }
+    function geoDistance(loc1, loc2) {
+      const R = 6371000;
+      const dLat = toRad(loc2[0] - loc1[0]);
+      const dLon = toRad(loc2[1] - loc1[1]);
+      const lat1 = toRad(loc1[0]);
+      const lat2 = toRad(loc2[0]);
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+    const distance = geoDistance(userLocation, AUTHORIZED_LOCATION);
+    const location_ok = distance <= GEOFENCE_RADIUS_METERS;
+    // AWS Rekognition setup
+    const rekognition = new AWS.Rekognition({
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: process.env.AWS_REGION
+    });
+    // S3 setup
+    const s3 = new AWS.S3({
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: process.env.AWS_REGION
+    });
+    const BUCKET_NAME = process.env.S3_BUCKET;
+    const FOLDER_NAME = 'emp-imges';
+    let face_matched = false;
+    let matched_key = null;
+    let similarity = 0;
+    // Read uploaded image
+    const imageBuffer = fs.readFileSync(req.file.path);
+    // List S3 images
+    let files;
+    try {
+      files = await s3.listObjectsV2({ Bucket: BUCKET_NAME, Prefix: FOLDER_NAME + '/' }).promise();
+    } catch (e) {
+      return res.json({
+        face_matched: false,
+        matched_with: null,
+        similarity: 0,
+        location_ok,
+        distance_m: Math.round(distance * 100) / 100,
+        status: `⚠️ S3 error. Location ${location_ok ? 'ok' : 'outside geo-fence'}`,
+        note: 'Check AWS credentials and S3 bucket configuration'
+      });
+    }
+    if (!files.Contents || files.Contents.length === 0) {
+      return res.json({
+        face_matched: false,
+        matched_with: null,
+        similarity: 0,
+        location_ok,
+        distance_m: Math.round(distance * 100) / 100,
+        status: `⚠️ No employee photos found in S3. Location ${location_ok ? 'ok' : 'outside geo-fence'}`,
+        note: 'Upload employee photos to S3 bucket for face recognition'
+      });
+    }
+    for (const obj of files.Contents) {
+      const key = obj.Key;
+      if (key.endsWith('.jpg') || key.endsWith('.png')) {
+        try {
+          const response = await rekognition.compareFaces({
+            SourceImage: { S3Object: { Bucket: BUCKET_NAME, Name: key } },
+            TargetImage: { Bytes: imageBuffer },
+            SimilarityThreshold: 90
+          }).promise();
+          if (response.FaceMatches && response.FaceMatches.length > 0) {
+            similarity = response.FaceMatches[0].Similarity;
+            matched_key = key;
+            face_matched = true;
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+    }
+    let status = '';
+    if (face_matched && location_ok) status = '✅ Face matched & inside geo-fence';
+    else if (face_matched && !location_ok) status = '⚠️ Face matched but outside geo-fence';
+    else if (!face_matched && location_ok) status = '❌ Face not matched but inside geo-fence';
+    else status = '❌ Face not matched and outside geo-fence';
+    res.json({
+      face_matched,
+      matched_with: matched_key,
+      similarity: Math.round(similarity * 100) / 100,
+      location_ok,
+      distance_m: Math.round(distance * 100) / 100,
+      status
+    });
+    // Clean up uploaded file
+    fs.unlinkSync(req.file.path);
+  } catch (err) {
+    res.status(500).json({ error: 'Internal Server Error', details: err.message });
+  }
+});
+
+// Save attendance record
+app.post("/api/attendance", async (req, res) => {
+  try {
+    const { employeeId, date, checkIn, checkOut, status } = req.body;
+    if (!employeeId || !date) {
+      return res.status(400).json({ error: "employeeId and date are required" });
+    }
+    const attendanceRecord = new Attendance({
+      employeeId,
+      date,
+      checkIn,
+      checkOut,
+      status
+    });
+    await attendanceRecord.save();
+    res.status(201).json(attendanceRecord);
+  } catch (err) {
+    console.error("Error saving attendance record:", err);
+    res.status(500).json({ error: "Failed to save attendance record" });
+  }
+});
+
+// Employee password reset
+app.post("/api/employee/reset-password", async (req, res) => {
+  try {
+    const { employeeId, newPassword } = req.body;
+    if (!employeeId || !newPassword) {
+      return res.status(400).json({ error: "employeeId and newPassword are required" });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const updated = await EmployeeLogin.findOneAndUpdate(
+      { employeeId },
+      { password: hashedPassword },
+      { new: true }
+    );
+    if (!updated) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+    res.json({ success: true, message: "Password reset successful" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to reset password" });
+  }
+});
+
+// Centre password reset
+app.post("/api/centre/reset-password", async (req, res) => {
+  try {
+    const { username, newPassword } = req.body;
+    if (!username || !newPassword) {
+      return res.status(400).json({ error: "username and newPassword are required" });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const updated = await CentreLogin.findOneAndUpdate(
+      { username },
+      { password: hashedPassword },
+      { new: true }
+    );
+    if (!updated) {
+      return res.status(404).json({ error: "Centre not found" });
+    }
+    res.json({ success: true, message: "Password reset successful" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to reset password" });
+  }
+});
+
+// In-memory OTP store for demo
+const otpStore = { employee: {}, centre: {} };
+
+// Helper to generate OTP
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Employee request reset
+app.post('/api/employee/request-reset', async (req, res) => {
+  const { employeeId } = req.body;
+  if (!employeeId) return res.status(400).json({ error: 'employeeId required' });
+  const user = await EmployeeLogin.findOne({ employeeId });
+  if (!user) return res.status(404).json({ error: 'Employee not found' });
+  const otp = generateOTP();
+  otpStore.employee[employeeId] = { otp, expires: Date.now() + 10 * 60 * 1000 };
+  // Simulate sending OTP via email
+  console.log(`OTP for employee ${employeeId} (${user.email}): ${otp}`);
+  res.json({ success: true, message: 'OTP sent to registered email (simulated)' });
+});
+
+// Employee verify reset
+app.post('/api/employee/verify-reset', async (req, res) => {
+  const { employeeId, otp, newPassword } = req.body;
+  if (!employeeId || !otp || !newPassword) return res.status(400).json({ error: 'All fields required' });
+  const record = otpStore.employee[employeeId];
+  if (!record || record.otp !== otp) return res.status(400).json({ error: 'Invalid OTP' });
+  if (Date.now() > record.expires) return res.status(400).json({ error: 'OTP expired' });
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  const updated = await EmployeeLogin.findOneAndUpdate({ employeeId }, { password: hashedPassword });
+  if (!updated) return res.status(404).json({ error: 'Employee not found' });
+  delete otpStore.employee[employeeId];
+  res.json({ success: true, message: 'Password reset successful' });
+});
+
+// Centre request reset
+app.post('/api/centre/request-reset', async (req, res) => {
+  const { username } = req.body;
+  if (!username) return res.status(400).json({ error: 'username required' });
+  const user = await CentreLogin.findOne({ username });
+  if (!user) return res.status(404).json({ error: 'Centre not found' });
+  const otp = generateOTP();
+  otpStore.centre[username] = { otp, expires: Date.now() + 10 * 60 * 1000 };
+  // Simulate sending OTP via email
+  console.log(`OTP for centre ${username} (${user.email}): ${otp}`);
+  res.json({ success: true, message: 'OTP sent to registered email (simulated)' });
+});
+
+// Centre verify reset
+app.post('/api/centre/verify-reset', async (req, res) => {
+  const { username, otp, newPassword } = req.body;
+  if (!username || !otp || !newPassword) return res.status(400).json({ error: 'All fields required' });
+  const record = otpStore.centre[username];
+  if (!record || record.otp !== otp) return res.status(400).json({ error: 'Invalid OTP' });
+  if (Date.now() > record.expires) return res.status(400).json({ error: 'OTP expired' });
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  const updated = await CentreLogin.findOneAndUpdate({ username }, { password: hashedPassword });
+  if (!updated) return res.status(404).json({ error: 'Centre not found' });
+  delete otpStore.centre[username];
+  res.json({ success: true, message: 'Password reset successful' });
 });
 
 const PORT = process.env.PORT || 5000;

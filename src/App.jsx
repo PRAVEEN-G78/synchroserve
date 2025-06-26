@@ -31,6 +31,165 @@ import TokenManager from './components/Auth/TokenManager';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import AdminDashboard from './components/Dashboard/AdminDashboard';
 
+// Add placeholder components for forgot password forms
+const EmployeeForgotPassword = () => {
+  const [step, setStep] = useState(1);
+  const [employeeId, setEmployeeId] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const handleRequestOtp = async (e) => {
+    e.preventDefault();
+    setError(""); setMessage("");
+    if (!employeeId) { setError("Employee ID required"); return; }
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/employee/request-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employeeId })
+      });
+      const data = await res.json();
+      if (!res.ok) setError(data.error || "Failed to send OTP");
+      else { setMessage("OTP sent to your registered email (simulated)"); setStep(2); }
+    } catch (err) { setError("Network error"); }
+    finally { setLoading(false); }
+  };
+
+  const handleVerifyReset = async (e) => {
+    e.preventDefault();
+    setError(""); setMessage("");
+    if (!otp || !newPassword || !confirmPassword) { setError("All fields required"); return; }
+    if (newPassword !== confirmPassword) { setError("Passwords do not match"); return; }
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/employee/verify-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employeeId, otp, newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) setError(data.error || "Failed to reset password");
+      else setMessage("Password reset successful. You can now log in.");
+    } catch (err) { setError("Network error"); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div className="login-bg">
+      <form className="login-form bouncy" onSubmit={step === 1 ? handleRequestOtp : handleVerifyReset}>
+        <h2 className="login-title">Employee Forgot Password</h2>
+        <div className="login-field">
+          <label htmlFor="employeeId">Employee ID</label>
+          <input id="employeeId" name="employeeId" type="text" className="bouncy-input" value={employeeId} onChange={e => setEmployeeId(e.target.value)} required disabled={step === 2} />
+        </div>
+        {step === 2 && (
+          <>
+            <div className="login-field">
+              <label htmlFor="otp">OTP</label>
+              <input id="otp" name="otp" type="text" className="bouncy-input" value={otp} onChange={e => setOtp(e.target.value)} required />
+            </div>
+            <div className="login-field">
+              <label htmlFor="newPassword">New Password</label>
+              <input id="newPassword" name="newPassword" type="password" className="bouncy-input" value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
+            </div>
+            <div className="login-field">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <input id="confirmPassword" name="confirmPassword" type="password" className="bouncy-input" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
+            </div>
+          </>
+        )}
+        {error && <div className="login-error bouncy-error">{error}</div>}
+        {message && <div className="login-success" style={{ color: 'green', marginBottom: 8 }}>{message}</div>}
+        <button type="submit" className="login-btn bouncy-btn" disabled={loading}>{loading ? (step === 1 ? "Sending..." : "Resetting...") : (step === 1 ? "Send OTP" : "Reset Password")}</button>
+      </form>
+    </div>
+  );
+};
+
+const CentreForgotPassword = () => {
+  const [step, setStep] = useState(1);
+  const [username, setUsername] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const handleRequestOtp = async (e) => {
+    e.preventDefault();
+    setError(""); setMessage("");
+    if (!username) { setError("Username required"); return; }
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/centre/request-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username })
+      });
+      const data = await res.json();
+      if (!res.ok) setError(data.error || "Failed to send OTP");
+      else { setMessage("OTP sent to your registered email (simulated)"); setStep(2); }
+    } catch (err) { setError("Network error"); }
+    finally { setLoading(false); }
+  };
+
+  const handleVerifyReset = async (e) => {
+    e.preventDefault();
+    setError(""); setMessage("");
+    if (!otp || !newPassword || !confirmPassword) { setError("All fields required"); return; }
+    if (newPassword !== confirmPassword) { setError("Passwords do not match"); return; }
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/centre/verify-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, otp, newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) setError(data.error || "Failed to reset password");
+      else setMessage("Password reset successful. You can now log in.");
+    } catch (err) { setError("Network error"); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div className="login-bg">
+      <form className="login-form bouncy" onSubmit={step === 1 ? handleRequestOtp : handleVerifyReset}>
+        <h2 className="login-title">Centre Forgot Password</h2>
+        <div className="login-field">
+          <label htmlFor="username">Username</label>
+          <input id="username" name="username" type="text" className="bouncy-input" value={username} onChange={e => setUsername(e.target.value)} required disabled={step === 2} />
+        </div>
+        {step === 2 && (
+          <>
+            <div className="login-field">
+              <label htmlFor="otp">OTP</label>
+              <input id="otp" name="otp" type="text" className="bouncy-input" value={otp} onChange={e => setOtp(e.target.value)} required />
+            </div>
+            <div className="login-field">
+              <label htmlFor="newPassword">New Password</label>
+              <input id="newPassword" name="newPassword" type="password" className="bouncy-input" value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
+            </div>
+            <div className="login-field">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <input id="confirmPassword" name="confirmPassword" type="password" className="bouncy-input" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
+            </div>
+          </>
+        )}
+        {error && <div className="login-error bouncy-error">{error}</div>}
+        {message && <div className="login-success" style={{ color: 'green', marginBottom: 8 }}>{message}</div>}
+        <button type="submit" className="login-btn bouncy-btn" disabled={loading}>{loading ? (step === 1 ? "Sending..." : "Resetting...") : (step === 1 ? "Send OTP" : "Reset Password")}</button>
+      </form>
+    </div>
+  );
+};
+
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openSections, setOpenSections] = useState({});
@@ -286,18 +445,18 @@ function App() {
                     <a href="/centre/register" className="registration-link" style={{
                       display: 'inline-block',
                       padding: '14px 32px',
-                      background: '#21CBF3',
-                      color: '#1976D2',
+                      background: '#2196F3',
+                      color: '#fff',
                       borderRadius: '6px',
                       fontWeight: 600,
                       fontSize: '1.1rem',
                       textDecoration: 'none',
-                      boxShadow: '0 2px 8px rgba(33,203,243,0.08)',
+                      boxShadow: '0 2px 8px rgba(33,150,243,0.08)',
                       transition: 'background 0.2s',
                       marginBottom: '8px'
                     }}
-                    onMouseOver={e => e.currentTarget.style.background = '#b2ebf2'}
-                    onMouseOut={e => e.currentTarget.style.background = '#21CBF3'}
+                    onMouseOver={e => e.currentTarget.style.background = '#1976D2'}
+                    onMouseOut={e => e.currentTarget.style.background = '#2196F3'}
                     >
                       Register as Centre
                     </a>
@@ -370,6 +529,8 @@ function App() {
               {!isAuthenticated && (
                 <Route path="*" element={<LoginSelection />} />
               )}
+              <Route path="/employee/forgot-password" element={<EmployeeForgotPassword />} />
+              <Route path="/centre/forgot-password" element={<CentreForgotPassword />} />
             </Routes>
           )}
         </main>
