@@ -163,6 +163,10 @@ function EmployeeHome() {
             <label>Role</label>
             <span className="role-badge">{user?.role}</span>
           </div>
+          <div className="profile-field">
+            <label>Center Code</label>
+            <span>{user?.centerCode || <span className="placeholder">Not provided</span>}</span>
+          </div>
           
           <div className="profile-field">
             <label>Account Created</label>

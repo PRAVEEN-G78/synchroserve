@@ -1030,5 +1030,16 @@ app.post('/api/centre/verify-reset', async (req, res) => {
   res.json({ success: true, message: 'Password reset successful' });
 });
 
+// Get all attendance records
+app.get('/api/attendance', async (req, res) => {
+  try {
+    const records = await Attendance.find();
+    res.json(records);
+  } catch (err) {
+    console.error('Error fetching attendance records:', err);
+    res.status(500).json({ error: 'Failed to fetch attendance records' });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

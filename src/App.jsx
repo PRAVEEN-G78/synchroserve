@@ -30,6 +30,8 @@ import InactivityTimer from './components/Auth/InactivityTimer';
 import TokenManager from './components/Auth/TokenManager';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import AdminDashboard from './components/Dashboard/AdminDashboard';
+import AttendanceTracking from './components/Attendance/AttendanceTracking';
+import AdminAttendanceList from './components/Attendance/AdminAttendanceList';
 
 // Add placeholder components for forgot password forms
 const EmployeeForgotPassword = () => {
@@ -277,6 +279,16 @@ function App() {
       ],
     },
     {
+      text: 'Attendance Tracking',
+      icon: CalendarTodayIcon,
+      path: '/attendance-tracking',
+      description: "Track employees' daily attendance records",
+      subItems: [
+        { text: 'Daily Attendance', path: '/attendance-tracking', description: "Present: 32, Absent: 3, Late: 2 (today)" },
+        { text: 'Attendance Reports', path: '/attendance-tracking', description: "Attendance Rate: 94% this month" },
+      ],
+    },
+    {
       text: 'Performance',
       icon: TrendingUpIcon,
       path: '/performance',
@@ -307,6 +319,12 @@ function App() {
       icon: DashboardIcon,
       path: '/admin/dashboard',
       description: 'Admin dashboard and management',
+    },
+    {
+      text: 'Attendance List',
+      icon: CalendarTodayIcon,
+      path: '/admin/attendance-list',
+      description: 'View all employees attendance records',
     },
     {
       text: 'Registration Links',
@@ -513,10 +531,20 @@ function App() {
                   <PayrollPreview />
                 </ProtectedRoute>
               } />
+              <Route path="/attendance-tracking" element={
+                <ProtectedRoute allowedUserTypes={['centre']}>
+                  <AttendanceTracking />
+                </ProtectedRoute>
+              } />
               {/* Admin-only routes - TRUE BLOCKING */}
               <Route path="/admin/dashboard" element={
                 <ProtectedRoute allowedUserTypes={['admin']}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/attendance-list" element={
+                <ProtectedRoute allowedUserTypes={['admin']}>
+                  <AdminAttendanceList />
                 </ProtectedRoute>
               } />
               {/* Catch-all route for authenticated users */}
