@@ -232,9 +232,14 @@
   color: #f57c00;
 }
 
+.status-leave {
+  background-color: #fffde7;
+  color: #fbc02d;
+}
+
 .status-half-day {
-  background-color: #e3f2fd;
-  color: #1565c0;
+  background-color: #f3ffe3;
+  color: #7ba307;
 }
 
 .status-on-leave {
@@ -413,4 +418,147 @@
     text-align: left;
     width: 100%;
   }
+}
+
+/* Face Authentication Modal */
+.face-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.face-modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.face-modal-content h2 {
+  color: #1976D2;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.face-modal-content video {
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  margin-bottom: 1rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.face-modal-content button {
+  margin: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.face-modal-content button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.face-modal-content button:hover::before {
+  left: 100%;
+}
+
+.face-modal-content .button-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  border: 2px solid transparent;
+}
+
+.face-modal-content .button-primary:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+}
+
+.face-modal-content .button-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.face-modal-content .button-secondary {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+  border: 2px solid transparent;
+}
+
+.face-modal-content .button-secondary:hover {
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(245, 87, 108, 0.6);
+}
+
+.face-modal-content .button-secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+}
+
+.face-modal-content button:disabled {
+  background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+  color: #7f8c8d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(189, 195, 199, 0.3);
+}
+
+.face-modal-content button:disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(189, 195, 199, 0.3);
+}
+
+.face-modal-content .icon {
+  font-size: 1.1rem;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.stat-card.half-day, .stat-card.stat-inline.half-day {
+  border-left: 6px solid #a7d307;
 } 

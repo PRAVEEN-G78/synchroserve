@@ -167,6 +167,27 @@ function Dashboard() {
         </ul>
       </nav>
       <div style={{ flex: 1 }}>
+        {/* Highlighted Center Name and Code */}
+        {user && (user.centreName || user.centerName || userCentreCode) && (
+          <div style={{
+            background: '#e3f2fd',
+            padding: '18px 24px 10px 24px',
+            borderRadius: '0 0 12px 12px',
+            marginBottom: 24,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(25, 118, 210, 0.07)'
+          }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#1976d2', marginBottom: 2, textAlign: 'center' }}>
+              {user.centreName || user.centerName || 'Center'}
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: '#333', textAlign: 'center' }}>
+              Center Code: <span style={{ color: '#1976d2' }}>{userCentreCode}</span>
+            </div>
+          </div>
+        )}
         <div className="dashboard-container">
           <h1 className="dashboard-title">Center Management Dashboard</h1>
 

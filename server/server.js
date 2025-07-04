@@ -1033,7 +1033,9 @@ app.post('/api/centre/verify-reset', async (req, res) => {
 // Get all attendance records
 app.get('/api/attendance', async (req, res) => {
   try {
-    const records = await Attendance.find();
+    const { employeeId } = req.query;
+    const filter = employeeId ? { employeeId } : {};
+    const records = await Attendance.find(filter);
     res.json(records);
   } catch (err) {
     console.error('Error fetching attendance records:', err);

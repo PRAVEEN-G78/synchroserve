@@ -46,8 +46,8 @@ function AttendanceTracking() {
     { employeeId: 'EMP001', name: 'Alice Smith', date: today + 'T09:00:00Z', checkIn: today + 'T09:00:00Z', checkOut: today + 'T18:00:00Z', status: 'Present', workingHours: 9 },
     { employeeId: 'EMP002', name: 'Bob Johnson', date: today + 'T09:15:00Z', checkIn: today + 'T09:15:00Z', checkOut: today + 'T18:00:00Z', status: 'Late', workingHours: 8.75 },
     { employeeId: 'EMP003', name: 'Charlie Lee', date: today + 'T00:00:00Z', checkIn: '', checkOut: '', status: 'Absent', workingHours: 0 },
-    { employeeId: 'EMP004', name: 'Diana Patel', date: today + 'T09:05:00Z', checkIn: today + 'T09:05:00Z', checkOut: today + 'T17:30:00Z', status: 'Present', workingHours: 8.5 },
-    { employeeId: 'EMP005', name: 'Ethan Kim', date: today + 'T09:00:00Z', checkIn: today + 'T09:00:00Z', checkOut: today + 'T17:45:00Z', status: 'Present', workingHours: 8.75 },
+    { employeeId: 'EMP004', name: 'Diana Patel', date: today + 'T09:05:00Z', checkIn: today + 'T09:05:00Z', checkOut: today + 'T13:00:00Z', status: 'Half Day', workingHours: 4 },
+    { employeeId: 'EMP005', name: 'Ethan Kim', date: today + 'T00:00:00Z', checkIn: '', checkOut: '', status: 'Leave', workingHours: 0 },
   ];
 
   // Use fetched records if available, otherwise demo data
@@ -55,6 +55,8 @@ function AttendanceTracking() {
   const present = recordsToShow.filter(r => r.status === 'Present').length;
   const late = recordsToShow.filter(r => r.status === 'Late').length;
   const absent = recordsToShow.filter(r => r.status === 'Absent').length;
+  const leave = recordsToShow.filter(r => r.status === 'On Leave' || r.status === 'Leave').length;
+  const halfDay = recordsToShow.filter(r => r.status === 'Half Day').length;
 
   // Handle form input
   const handleChange = e => {
@@ -108,6 +110,14 @@ function AttendanceTracking() {
           <div className="stat-card stat-inline">
             <div className="stat-label">Absent</div>
             <div className="stat-value">{absent}</div>
+          </div>
+          <div className="stat-card stat-inline">
+            <div className="stat-label">Leave</div>
+            <div className="stat-value">{leave}</div>
+          </div>
+          <div className="stat-card stat-inline half-day">
+            <div className="stat-label">Half Day</div>
+            <div className="stat-value">{halfDay}</div>
           </div>
         </div>
       </div>
