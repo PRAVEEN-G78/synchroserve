@@ -27,6 +27,11 @@ function AdminDashboard() {
   const [centersLoading, setCentersLoading] = useState(false);
   const [centerCodeFilter, setCenterCodeFilter] = useState("");
   const [employeeIdFilter, setEmployeeIdFilter] = useState("");
+  const [editDocumentIndex, setEditDocumentIndex] = useState(null);
+  const [editDocumentFile, setEditDocumentFile] = useState(null);
+  const [addingDocument, setAddingDocument] = useState(false);
+  const [newDocType, setNewDocType] = useState("");
+  const [newDocFile, setNewDocFile] = useState(null);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -348,6 +353,78 @@ function AdminDashboard() {
       setCenterSaveError('Network error');
     } finally {
       setCenterSaveLoading(false);
+    }
+  };
+
+  const handleEditDocumentClick = (index) => {
+    setEditDocumentIndex(index);
+    setEditDocumentFile(null);
+  };
+
+  const handleCancelDocumentEdit = () => {
+    setEditDocumentIndex(null);
+    setEditDocumentFile(null);
+  };
+
+  const handleDocumentFileChange = (e, index) => {
+    if (e.target.files && e.target.files[0]) {
+      setEditDocumentFile(e.target.files[0]);
+    }
+  };
+
+  const handleSaveDocumentEdit = async (index) => {
+    if (!editDocumentFile) return;
+    // Simulate upload and update document URL (replace with real upload logic)
+    const url = URL.createObjectURL(editDocumentFile); // For demo only
+    setEditEmployee(prev => {
+      const docs = [...prev.documents];
+      docs[index] = { ...docs[index], url };
+      return { ...prev, documents: docs };
+    });
+    setEditDocumentIndex(null);
+    setEditDocumentFile(null);
+  };
+
+  const handleAddDocumentClick = () => {
+    setAddingDocument(true);
+    setNewDocType("");
+    setNewDocFile(null);
+  };
+
+  const handleCancelAddDocument = () => {
+    setAddingDocument(false);
+    setNewDocType("");
+    setNewDocFile(null);
+  };
+
+  const handleNewDocTypeChange = (e) => setNewDocType(e.target.value);
+
+  const handleNewDocFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) setNewDocFile(e.target.files[0]);
+  };
+
+  const handleSaveNewDocument = () => {
+    if (!newDocType || !newDocFile) return;
+    const url = URL.createObjectURL(newDocFile); // Replace with real upload logic
+    setEditEmployee(prev => ({
+      ...prev,
+      documents: [...(prev.documents || []), { type: newDocType, url }]
+    }));
+    setAddingDocument(false);
+    setNewDocType("");
+    setNewDocFile(null);
+  };
+
+  const handleRemoveDocument = (index) => {
+    if (!window.confirm('Are you sure you want to delete this document?')) return;
+    setEditEmployee(prev => {
+      const docs = [...prev.documents];
+      docs.splice(index, 1);
+      return { ...prev, documents: docs };
+    });
+    if (editDocumentIndex === index) {
+      setEditDocumentIndex(null);
+      setEditDocumentFile(null);
     }
   };
 
@@ -700,7 +777,62 @@ function AdminDashboard() {
                       {Array.isArray(editEmployee.documents) && editEmployee.documents.length > 0 ? (
                         editEmployee.documents.map((doc, i) => (
                           <li key={i}>
-                            {doc.type}: {doc.url ? <a href={doc.url} className="file-link" target="_blank" rel="noopener noreferrer">View</a> : 'Not uploaded'}
+                            <span>{doc.type}</span>
+                            <span className="document-actions">
+                              {doc.url ? (
+                                <a href={doc.url} className="file-link" target="_blank" rel="noopener noreferrer" style={{ marginRight: 8 }}>
+                                  View
+                                </a>
+                              ) : (
+                                <span style={{ marginRight: 8, color: '#aaa' }}>Not uploaded</span>
+                              )}
+                              <button
+                                type="button"
+                                className="button button-secondary"
+                                style={{ fontSize: '0.92em', padding: '2px 8px' }}
+                                onClick={() => handleEditDocumentClick(i)}
+                              >
+                                Edit
+                              </button>
+                              {editDocumentIndex !== i && (
+                                <button
+                                  type="button"
+                                  className="button button-secondary"
+                                  style={{ fontSize: '1.1em', padding: '2px 8px', color: 'red', borderColor: 'red', marginLeft: 4 }}
+                                  title="Remove Document"
+                                  onClick={() => handleRemoveDocument(i)}
+                                >
+                                  ✖️
+                                </button>
+                              )}
+                              {editDocumentIndex === i && (
+                                <>
+                                  <input
+                                    type="file"
+                                    accept="application/pdf,image/*"
+                                    className="document-file-input compact-file-input"
+                                    onChange={e => handleDocumentFileChange(e, i)}
+                                    style={{ width: 110, fontSize: '0.90em', padding: '2px 4px' }}
+                                  />
+                                  <button
+                                    type="button"
+                                    className="button button-primary"
+                                    style={{ fontSize: '0.92em', padding: '2px 8px' }}
+                                    onClick={() => handleSaveDocumentEdit(i)}
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="button button-secondary"
+                                    style={{ fontSize: '0.92em', padding: '2px 8px', color: 'red', borderColor: 'red' }}
+                                    onClick={handleCancelDocumentEdit}
+                                  >
+                                    Cancel
+                                  </button>
+                                </>
+                              )}
+                            </span>
                           </li>
                         ))
                       ) : (
@@ -708,6 +840,49 @@ function AdminDashboard() {
                       )}
                     </ul>
                   </div>
+                  {!addingDocument ? (
+                    <button
+                      type="button"
+                      className="button button-primary"
+                      style={{ marginTop: 10, fontSize: '0.95em', padding: '4px 16px' }}
+                      onClick={handleAddDocumentClick}
+                    >
+                      + Add Document
+                    </button>
+                  ) : (
+                    <div className="document-actions" style={{ marginTop: 10 }}>
+                      <input
+                        type="text"
+                        placeholder="Document Type"
+                        value={newDocType}
+                        onChange={handleNewDocTypeChange}
+                        style={{ width: 140, marginRight: 8, fontSize: '0.95em', padding: '2px 6px', borderRadius: 4, border: '1px solid #bdbdbd' }}
+                      />
+                      <input
+                        type="file"
+                        accept="application/pdf,image/*"
+                        className="document-file-input compact-file-input"
+                        onChange={handleNewDocFileChange}
+                        style={{ width: 110, fontSize: '0.90em', padding: '2px 4px', marginRight: 8 }}
+                      />
+                      <button
+                        type="button"
+                        className="button button-primary"
+                        style={{ fontSize: '0.92em', padding: '2px 8px' }}
+                        onClick={handleSaveNewDocument}
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        className="button button-secondary"
+                        style={{ fontSize: '0.92em', padding: '2px 8px', color: 'red', borderColor: 'red' }}
+                        onClick={handleCancelAddDocument}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                   {saveError && <div className="login-error bouncy-error" style={{ marginBottom: 8 }}>{saveError}</div>}
                   <div className="dialog-actions">
                     <button type="button" className="button button-secondary" onClick={handleEditDialogClose}>
@@ -833,6 +1008,32 @@ function AdminDashboard() {
                   >
                     Edit
                   </button>
+                  {selectedCenter.status !== 'Approved' && (
+                    <button
+                      className="button button-primary"
+                      style={{ backgroundColor: 'green', marginLeft: 8 }}
+                      onClick={async () => {
+                        setEditCenter(selectedCenter);
+                        await handleApproveCenter();
+                        setOpenCenterDialog(false);
+                      }}
+                    >
+                      Approve
+                    </button>
+                  )}
+                  {selectedCenter.status !== 'Rejected' && (
+                    <button
+                      className="button button-secondary"
+                      style={{ color: 'orange', borderColor: 'orange', marginLeft: 8 }}
+                      onClick={async () => {
+                        setEditCenter(selectedCenter);
+                        await handleRejectCenter();
+                        setOpenCenterDialog(false);
+                      }}
+                    >
+                      Reject
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -876,13 +1077,6 @@ function AdminDashboard() {
                   <div className="dialog-actions">
                     <button type="button" className="button button-secondary" onClick={handleEditCenterDialogClose}>Cancel</button>
                     <button type="submit" className="button button-primary" disabled={centerSaveLoading}>{centerSaveLoading ? 'Saving...' : 'Save Changes'}</button>
-                    <button type="button" className="button button-secondary" style={{ color: 'red', borderColor: 'red' }} onClick={handleDeleteCenter} disabled={centerSaveLoading}>Delete</button>
-                    {editCenterForm.status !== 'Approved' && (
-                      <button type="button" className="button button-primary" style={{ backgroundColor: 'green', marginLeft: 8 }} onClick={handleApproveCenter} disabled={centerSaveLoading}>Approve</button>
-                    )}
-                    {editCenterForm.status !== 'Rejected' && (
-                      <button type="button" className="button button-secondary" style={{ color: 'orange', borderColor: 'orange', marginLeft: 8 }} onClick={handleRejectCenter} disabled={centerSaveLoading}>Reject</button>
-                    )}
                   </div>
                 </form>
               </div>

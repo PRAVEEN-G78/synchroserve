@@ -82,12 +82,25 @@
 }
 .stat-card:nth-child(2) {
   border-left: 6px solid #43a047;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  background: linear-gradient(135deg, #e8f5e9 0%,rgb(123, 247, 129) 100%);
 }
 .stat-card:nth-child(3) {
   border-left: 6px solid #1976d2;
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  background: linear-gradient(135deg, #e3f2fd 0%,rgb(106, 173, 239) 100%);
 }
+.stat-card:nth-child(4) {
+  border-left: 6px solid rgb(241, 14, 192);
+  background: linear-gradient(135deg, #e3f2fd 0%, rgb(251, 107, 220) 100%);
+}
+.stat-card:nth-child(5) {
+  border-left: 6px solid #f9e211;
+  background: linear-gradient(135deg, #e3f2fd 0%, #b8e518 100%);
+}
+.stat-card:nth-child(6) {
+  border-left: 6px solid #9ff50a;
+  background: linear-gradient(135deg, #e3f2fd 0%,rgb(175, 247, 52) 100%);
+}
+
 
 .stat-card:hover {
   box-shadow: 0 12px 32px 0 rgba(102, 126, 234, 0.18), 0 2px 8px rgba(118, 75, 162, 0.10);
@@ -394,7 +407,7 @@
 }
 
 .onboarding-table td {
-  color: #333;
+  color:black;
   background: #fff;
   border-radius: 0 0 10px 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -415,4 +428,69 @@
     min-width: 180px;
     max-width: 100%;
   }
+}
+
+.onboarding-documents-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.onboarding-documents-list li {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.10);
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  min-width: 220px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #222;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: 1px solid #e1e5e9;
+}
+
+.onboarding-documents-list li:not(:last-child) {
+  margin-right: 8px;
+}
+
+.onboarding-documents-list .doc-icon {
+  font-size: 1.5rem;
+  margin-right: 12px;
+  color: #3959eb;
+}
+
+.onboarding-documents-list .doc-label {
+  flex: 1;
+}
+
+.onboarding-documents-list .doc-view-btn {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 10px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.10);
+  transition: background 0.2s, transform 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.onboarding-documents-list .doc-view-btn:hover {
+  background: linear-gradient(90deg, #3959eb 0%, #667eea 100%);
+  transform: translateY(-2px) scale(1.04);
+}
+
+.onboarding-documents-list .not-uploaded {
+  color: #c62828;
+  font-style: italic;
+  margin-left: 10px;
 } 

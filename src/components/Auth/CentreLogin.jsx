@@ -36,7 +36,7 @@ function CentreLogin() {
   };
 
   return (
-    <div className="login-bg">
+    <div className="login-bg" style={{ backgroundImage: `linear-gradient(90deg, rgba(102,126,234,0.7) 0%, rgba(118,75,162,0.7) 100%), url(${process.env.PUBLIC_URL + '/synchrobgm.jpeg'})`, backgroundPosition: 'center', backgroundSize: 'cover', backgroundRepeat: 'no-repeat' }}>
       <form className="login-form bouncy" onSubmit={handleSubmit} autoComplete="off">
         <h2 className="login-title">Centre Login</h2>
         <div className="login-field">
@@ -64,7 +64,7 @@ function CentreLogin() {
         </div>
         {error && <div className="login-error bouncy-error">{error}</div>}
         <button type="submit" className={`login-btn bouncy-btn${loading ? ' loading' : ''}`} disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? (<><span className="login-spinner" /> Logging in...</>) : 'Login'}
         </button>
         <div className="login-footer" style={{ marginTop: 16, textAlign: 'center' }}>
           <Link to="/centre/forgot-password" className="login-link">Forgot Password?</Link>

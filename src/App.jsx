@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import './App.css';
 
 // Import SVG icons
@@ -346,7 +346,7 @@ function App() {
   const drawer = (
     <>
       <div className="sidebar-header">
-        <h1 className="sidebar-title">SynchroServe</h1>
+        {/* <img src="/logo_synchro.png" alt="SynchroServe Logo" className="sidebar-title" style={{ maxHeight: '48px', width: 'auto' }} /> */}
       </div>
       <ul className="menu-list">
         {menuItems.map((item) => (
@@ -412,9 +412,9 @@ function App() {
             <img src={sidebarOpen ? ExpandLessIcon : MenuIcon} alt="Menu" />
           </button>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <h1 className="app-title">SynchroServe</h1>
+            <img src="/logo_synchro.png" alt="SynchroServe Logo" className="app-title" style={{ maxHeight: '33px', width: 'auto',backgroundColor:'white' }} />
             {isAuthenticated && user && (
-              <small style={{ color: '#fff', fontSize: '16px' }}>
+              <small style={{ color: '#1565c0', fontSize: '16px' }}>
                 Welcome, {userType === 'employee' ? `${user.firstName} ${user.lastName}` : user.centreName}
               </small>
             )}

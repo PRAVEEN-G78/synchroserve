@@ -219,25 +219,25 @@
 
 .status-present {
   background-color: #e8f5e9;
-  color: #2e7d32;
+  color: #ff9800;
 }
 
 .status-absent {
   background-color: #ffebee;
-  color: #c62828;
+  color: #1976d2;
 }
 
 .status-late {
   background-color: #fff3e0;
-  color: #f57c00;
+  color: #43a047;
 }
 
 .status-leave {
   background-color: #fffde7;
-  color: #fbc02d;
+  color: #dc004e;
 }
 
-.status-half-day {
+.status-half {
   background-color: #f3ffe3;
   color: #7ba307;
 }

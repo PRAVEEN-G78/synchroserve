@@ -265,12 +265,25 @@ function EmployeeHome() {
             {employeeRecord.documents && employeeRecord.documents.length > 0 && (
               <div style={{ marginTop: 16 }}>
                 <strong>Documents:</strong>
-                <ul>
-                  {employeeRecord.documents.map((doc, i) => (
-                    <li key={i}>
-                      {doc.type}: {doc.url ? <a href={doc.url} target="_blank" rel="noopener noreferrer">View</a> : 'Not uploaded'}
-                    </li>
-                  ))}
+                <ul className="onboarding-documents-list">
+                  {employeeRecord.documents.map((doc, i) => {
+                    let icon = '📄';
+                    if (doc.type.toLowerCase().includes('resume')) icon = '📄';
+                    else if (doc.type.toLowerCase().includes('appointment')) icon = '📑';
+                    else if (doc.type.toLowerCase().includes('pan')) icon = '🪪';
+                    else if (doc.type.toLowerCase().includes('scan')) icon = '🖨️';
+                    return (
+                      <li key={i}>
+                        <span className="doc-icon">{icon}</span>
+                        <span className="doc-label">{doc.type}</span>
+                        {doc.url ? (
+                          <a href={doc.url} target="_blank" rel="noopener noreferrer" className="doc-view-btn">View</a>
+                        ) : (
+                          <span className="not-uploaded">Not uploaded</span>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}

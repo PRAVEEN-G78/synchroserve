@@ -14,6 +14,7 @@ function AttendanceTracking() {
   });
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
+  const [employeeIdFilter, setEmployeeIdFilter] = useState('');
 
   // Fetch attendance records from backend
   useEffect(() => {
@@ -52,11 +53,17 @@ function AttendanceTracking() {
 
   // Use fetched records if available, otherwise demo data
   const recordsToShow = todayRecords.length > 0 ? todayRecords : demoRecords;
-  const present = recordsToShow.filter(r => r.status === 'Present').length;
-  const late = recordsToShow.filter(r => r.status === 'Late').length;
-  const absent = recordsToShow.filter(r => r.status === 'Absent').length;
-  const leave = recordsToShow.filter(r => r.status === 'On Leave' || r.status === 'Leave').length;
-  const halfDay = recordsToShow.filter(r => r.status === 'Half Day').length;
+  // Filter records by Employee ID (case-insensitive, partial match)
+  const filteredRecords = employeeIdFilter.trim() === ''
+    ? recordsToShow
+    : recordsToShow.filter(r =>
+        r.employeeId && r.employeeId.toLowerCase().includes(employeeIdFilter.trim().toLowerCase())
+      );
+  const present = filteredRecords.filter(r => r.status === 'Present').length;
+  const late = filteredRecords.filter(r => r.status === 'Late').length;
+  const absent = filteredRecords.filter(r => r.status === 'Absent').length;
+  const leave = filteredRecords.filter(r => r.status === 'On Leave' || r.status === 'Leave').length;
+  const halfDay = filteredRecords.filter(r => r.status === 'Half Day').length;
 
   // Handle form input
   const handleChange = e => {
@@ -125,6 +132,16 @@ function AttendanceTracking() {
         <div className="records-header">
           <h2 className="records-title">Attendance Records (Today)</h2>
         </div>
+        {/* Employee ID Filter */}
+        <div style={{ marginBottom: '1rem' }}>
+          <input
+            type="text"
+            placeholder="Filter by Employee ID..."
+            value={employeeIdFilter}
+            onChange={e => setEmployeeIdFilter(e.target.value)}
+            style={{ padding: '0.5rem', width: '250px', fontSize: '1rem' }}
+          />
+        </div>
         {loading ? (
           <div>Loading...</div>
         ) : error ? (
@@ -144,7 +161,7 @@ function AttendanceTracking() {
                 </tr>
               </thead>
               <tbody>
-                {recordsToShow.map((record, idx) => (
+                {filteredRecords.map((record, idx) => (
                   <tr key={record._id || idx}>
                     <td>{record.employeeId}</td>
                     <td>{record.name || '-'}</td>

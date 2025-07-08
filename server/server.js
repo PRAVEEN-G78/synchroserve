@@ -9,6 +9,7 @@ import AWS from "aws-sdk";
 import fs from "fs";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import nodemailer from 'nodemailer';
 
 const app = express();
 
@@ -1040,6 +1041,37 @@ app.get('/api/attendance', async (req, res) => {
   } catch (err) {
     console.error('Error fetching attendance records:', err);
     res.status(500).json({ error: 'Failed to fetch attendance records' });
+  }
+});
+
+// Add this endpoint after other app.use/app.post routes
+app.post('/api/send-manager-message', async (req, res) => {
+  const { name, employeeId, leaveType, startDate, endDate, reason, messageToManager } = req.body;
+  // Hardcoded manager email for demo
+  const managerEmail = 'manager@example.com';
+
+  // Configure nodemailer (use your real SMTP credentials in production)
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'your.email@gmail.com', // replace with your email
+      pass: 'yourpassword' // replace with your email password or app password
+    }
+  });
+
+  const mailOptions = {
+    from: 'your.email@gmail.com',
+    to: managerEmail,
+    subject: `New Leave Request from ${name}`,
+    text: `Employee Name: ${name}\nEmployee ID: ${employeeId}\nLeave Type: ${leaveType}\nStart Date: ${startDate}\nEnd Date: ${endDate}\nReason: ${reason}\n\nMessage to Manager: ${messageToManager || 'No message provided.'}`
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    res.json({ success: true, message: 'Message sent to center manager.' });
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).json({ success: false, message: 'Failed to send message to manager.' });
   }
 });
 

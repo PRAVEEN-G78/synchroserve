@@ -50,6 +50,7 @@ const initialFormData = {
   bankName: "",
   branchName: "",
   ifscCode: "",
+  photo: null,
   documents: [
     { type: "Resume", file: null, url: undefined, key: undefined },
     {
@@ -136,7 +137,6 @@ function Onboarding() {
     useState(educationOptions);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedBloodGroup, setSelectedBloodGroup] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -155,7 +155,6 @@ function Onboarding() {
 
   const handleBloodGroupSelect = (group) => {
     setFormData((prev) => ({ ...prev, bloodGroup: group }));
-    setSelectedBloodGroup(group);
     setSearchTerm(group);
     setShowDropdown(false);
   };
@@ -174,17 +173,6 @@ function Onboarding() {
     setFormData((prev) => ({
       ...prev,
       [name]: newValue,
-    }));
-    setErrors((prev) => ({
-      ...prev,
-      [name]: "",
-    }));
-  };
-
-  const handleSelectChange = (name) => (event) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: event.target.value,
     }));
     setErrors((prev) => ({
       ...prev,
@@ -306,8 +294,6 @@ function Onboarding() {
       }));
     }
   };
-
-  const validateStep = (step) => true;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -959,6 +945,40 @@ function Onboarding() {
           <div className="document-upload-section">
             <h3>Documents Upload</h3>
             <div className="document-list">
+              {/* Photo Upload as first document-item */}
+              {/* <div className="document-item">
+                <label className="document-label">Passport Size Photo</label>
+                <div className="document-controls">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={e => {
+                      const file = e.target.files[0];
+                      setFormData(prev => ({ ...prev, photo: file }));
+                    }}
+                    className="file-input"
+                    id="photo-upload"
+                  />
+                  <label htmlFor="photo-upload" className="button button-outlined">
+                    {formData.photo ? "Change Photo" : "Choose Photo"}
+                  </label>
+                  {formData.photo && (
+                    <>
+                      <span className="file-name">{formData.photo.name}</span>
+                      <a
+                        href={URL.createObjectURL(formData.photo)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="button button-secondary"
+                        style={{ marginLeft: 8 }}
+                      >
+                        View Photo
+                      </a>
+                    </>
+                  )}
+                </div>
+              </div> */}
+              {/* Existing document items */}
               {formData.documents.map((doc, index) => (
                 <div key={index} className="document-item">
                   <label className="document-label">{doc.type}{doc.type === 'All Experience Letters' && (

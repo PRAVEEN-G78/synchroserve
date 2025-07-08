@@ -247,6 +247,7 @@
 .file-link {
   display: inline-block;
   margin-left: 12px;
+  margin-right: 12px;
   padding: 6px 14px;
   background-color: #e3f2fd;
   color: #1976d2;

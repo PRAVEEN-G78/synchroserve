@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './LeaveManagement.css';
+import LeaveRequestForm from './LeaveRequestForm';
 
 function LeaveManagement() {
   // Sample data for leave requests
@@ -42,9 +43,32 @@ function LeaveManagement() {
   const approvedRequests = leaveRequests.filter(req => req.status === 'Approved').length;
   const rejectedRequests = leaveRequests.filter(req => req.status === 'Rejected').length;
 
+  const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    if (showForm) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showForm]);
+
   return (
     <div className="leave-management-container">
       <h1 className="leave-management-title">Leave Management</h1>
+      <button className="leave-request-btn" onClick={() => setShowForm(true)}>
+        Leave Request
+      </button>
+      {showForm && (
+        <div className="modal-overlay modal-fade-in" onClick={() => setShowForm(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <LeaveRequestForm onClose={() => setShowForm(false)} />
+          </div>
+        </div>
+      )}
 
       {/* Statistics Cards */}
       <div className="stats-grid">
